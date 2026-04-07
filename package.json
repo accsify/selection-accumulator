@@ -1,0 +1,198 @@
+{
+  "name": "selection-accumulator",
+  "displayName": "Selection Accumulator",
+  "description": "Accumulate text selections to copy/cut them together. Accessible and keyboard friendly.",
+  "publisher": "accsify",
+  "version": "1.2.2",
+  "homepage": "https://accsify.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/accsify/selection-accumulator"
+  },
+  "bugs": {
+    "url": "https://github.com/accsify/selection-accumulator/issues"
+  },
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Other",
+    "Keymaps"
+  ],
+  "keywords": [
+    "selection",
+    "accumulator",
+    "clipboard",
+    "copy",
+    "cut"
+  ],
+  "activationEvents": [
+    "onCommand:accumulator.mark",
+    "onCommand:accumulator.copy",
+    "onCommand:accumulator.cut",
+    "onCommand:accumulator.clear",
+    "onCommand:accumulator.deleteItem",
+    "onCommand:accumulator.moveUp",
+    "onCommand:accumulator.moveDown",
+    "onCommand:accumulator.focus",
+    "onView:accumulatorList"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "configuration": {
+      "id": "selectionAccumulator",
+      "title": "Selection Accumulator Settings",
+      "type": "object",
+      "properties": {
+        "selectionAccumulator.maxItems": {
+          "type": "number",
+          "default": 100,
+          "description": "Maximum number of items allowed in the accumulator list."
+        },
+        "selectionAccumulator.separator": {
+          "type": "string",
+          "default": "newline",
+          "enum": [
+            "newline",
+            "space",
+            "comma",
+            "pipe",
+            "custom"
+          ],
+          "enumItemLabels": [
+            "New Line",
+            "Space",
+            "Comma",
+            "Pipe (|)",
+            "Custom String"
+          ],
+          "description": "Separator to use between items when copying/cutting all."
+        },
+        "selectionAccumulator.customSeparator": {
+          "type": "string",
+          "default": "",
+          "description": "Custom separator string (Used only if Separator is set to 'custom')."
+        }
+      }
+    },
+    "views": {
+      "explorer": [
+        {
+          "id": "accumulatorList",
+          "name": "Accumulator List",
+          "contextualTitle": "Selection Accumulator"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "accumulator.mark",
+        "title": "Add Selection",
+        "category": "Accumulator",
+        "icon": "$(add)"
+      },
+      {
+        "command": "accumulator.focus",
+        "title": "Focus List",
+        "category": "Accumulator",
+        "icon": "$(list-selection)"
+      },
+      {
+        "command": "accumulator.copy",
+        "title": "Copy All",
+        "category": "Accumulator"
+      },
+      {
+        "command": "accumulator.cut",
+        "title": "Cut All",
+        "category": "Accumulator"
+      },
+      {
+        "command": "accumulator.clear",
+        "title": "Clear List",
+        "category": "Accumulator",
+        "icon": "$(clear-all)"
+      },
+      {
+        "command": "accumulator.deleteItem",
+        "title": "Remove Item",
+        "category": "Accumulator",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "accumulator.moveUp",
+        "title": "Move Up",
+        "category": "Accumulator",
+        "icon": "$(arrow-up)"
+      },
+      {
+        "command": "accumulator.moveDown",
+        "title": "Move Down",
+        "category": "Accumulator",
+        "icon": "$(arrow-down)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "accumulator.mark",
+          "when": "view == accumulatorList",
+          "group": "navigation"
+        },
+        {
+          "command": "accumulator.clear",
+          "when": "view == accumulatorList",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "accumulator.moveUp",
+          "when": "view == accumulatorList && viewItem == accumulatorItem",
+          "group": "inline@1"
+        },
+        {
+          "command": "accumulator.moveDown",
+          "when": "view == accumulatorList && viewItem == accumulatorItem",
+          "group": "inline@2"
+        },
+        {
+          "command": "accumulator.deleteItem",
+          "when": "view == accumulatorList && viewItem == accumulatorItem",
+          "group": "inline@3"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "accumulator.mark",
+        "key": "alt+a",
+        "mac": "cmd+alt+a",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "accumulator.focus",
+        "key": "alt+l",
+        "mac": "cmd+alt+l"
+      },
+      {
+        "command": "accumulator.copy",
+        "key": "alt+c",
+        "mac": "cmd+alt+c",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "accumulator.cut",
+        "key": "alt+x",
+        "mac": "cmd+alt+x",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "accumulator.clear",
+        "key": "alt+z",
+        "mac": "cmd+alt+z",
+        "when": "editorTextFocus"
+      }
+    ]
+  }
+}
