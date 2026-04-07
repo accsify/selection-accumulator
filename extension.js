@@ -61,6 +61,7 @@ function getSeparatorString(settings) {
         case 'space': return ' ';
         case 'comma': return ',';
         case 'pipe': return '|';
+        case 'tab': return '\t';
         case 'custom': return settings.customSeparator;
         case 'newline':
         default: return '\n';
@@ -168,14 +169,43 @@ function activate(context) {
         }
     });
 
-    // 4. Command to cancel/clear the list manually
+    // 4. Command to DELETE accumulator ranges from the document (no copy)
+    let deleteCmd = vscode.commands.registerCommand('accumulator.delete', async () => {
+        const editor = vscode.window.activeTextEditor;
+        if (editor && markedList.length > 0) {
+            // Delete ranges for the ACTIVE document only
+            const currentDocUri = editor.document.uri.toString();
+            const itemsToDelete = markedList.filter(item => item.documentUri.toString() === currentDocUri);
+
+            await editor.edit(editBuilder => {
+                // Sort from bottom to top before deleting to protect line numbers! 
+                const sortedItems = [...itemsToDelete].sort((a, b) => b.range.start.compareTo(a.range.start));
+                for (const item of sortedItems) {
+                    editBuilder.delete(item.range);
+                }
+            });
+
+            if (itemsToDelete.length < markedList.length) {
+                vscode.window.showWarningMessage('Note: Only items from the current active document were removed from the text. All items were cleared from the list.');
+            } else {
+                vscode.window.showInformationMessage(`Deleted ${markedList.length} items from document and cleared list.`);
+            }
+
+            markedList = []; // Clear list
+            updateContext();
+        } else if (markedList.length === 0) {
+            vscode.window.showInformationMessage('Accumulator list is empty.');
+        }
+    });
+
+    // 5. Command to cancel/clear the list manually
     let clearCmd = vscode.commands.registerCommand('accumulator.clear', () => {
         markedList = [];
         updateContext();
         vscode.window.showInformationMessage('Accumulator cleared.');
     });
 
-    // 5. Tree View Commands (Move Up, Move Down, Delete)
+    // 6. Tree View Commands (Move Up, Move Down, Delete Item)
     let moveUpCmd = vscode.commands.registerCommand('accumulator.moveUp', (element) => {
         if (element) {
             const index = markedList.findIndex(i => i.id === element.id);
@@ -205,13 +235,13 @@ function activate(context) {
         }
     });
 
-    // 6. Command to focus the list view directly
+    // 7. Command to focus the list view directly
     let focusCmd = vscode.commands.registerCommand('accumulator.focus', () => {
         vscode.commands.executeCommand('accumulatorList.focus');
     });
 
     context.subscriptions.push(
-        markCmd, copyCmd, cutCmd, clearCmd, 
+        markCmd, copyCmd, cutCmd, deleteCmd, clearCmd, 
         moveUpCmd, moveDownCmd, deleteItemCmd, focusCmd
     );
 }
